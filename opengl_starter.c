@@ -1,55 +1,66 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
+#include <stdlib.h>
 
-void display(void)
+static void display(void)
 {
-/*  clear all pixels  */
-    glClear (GL_COLOR_BUFFER_BIT);
+/*  clear all pixels  */    
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColor3d(1,0,0);
+ 
+    glPushMatrix();
+        glTranslated(-1, 0, -7);
+        glutWireSphere(2, 25, 25);
+    glPopMatrix();
+ 
+    glutSwapBuffers();
 
-/*  draw white polygon (rectangle) with corners at
- *  (0.25, 0.25, 0.0) and (0.75, 0.75, 0.0)  
- */
-    glColor3f (1.0, 1.0, 1.0);
-    glBegin(GL_POLYGON);
-        glVertex3f (0.25, 0.25, 0.0);
-        glVertex3f (0.75, 0.25, 0.0);
-        glVertex3f (0.75, 0.75, 0.0);
-        glVertex3f (0.25, 0.75, 0.0);
-    glEnd();
-
-/*  don't wait!  
- *  start processing buffered OpenGL routines 
- */
     glFlush ();
+}
+
+static void resize(int width, int height)
+{
+    const float ar = (float) width / (float) height;
+ 
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(-ar, ar, -1.0, 1.0, 2.0, 100.0);
+ 
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity() ;
 }
 
 void init (void) 
 {
 /*  select clearing (background) color       */
-    glClearColor (0.0, 0.0, 0.0, 0.0);
-
-/*  initialize viewing values  */
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+    glClearColor(1, 1, 1, 1);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+ 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+ 
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_LIGHTING); 
 }
 
-/* 
- *  Declare initial window size, position, and display mode
- *  (single buffer and RGBA).  Open window with "hello"
- *  in its title bar.  Call initialization routines.
- *  Register callback function to display graphics.
- *  Enter main loop and process events.
- */
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize (250, 250); 
-    glutInitWindowPosition (100, 100);
-    glutCreateWindow ("hello");
-    init ();
-    glutDisplayFunc(display); 
+    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(640, 480); 
+    glutInitWindowPosition(100, 100);
+
+    glutCreateWindow ("Solid and Wired spheres");    
+
+    init();
+    glutReshapeFunc(resize);
+    glutDisplayFunc(display);     
+
+
     glutMainLoop();
-    return 0;   /* ISO C requires main to return int. */
+    return 0;   
 }
